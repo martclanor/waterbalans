@@ -38,7 +38,6 @@ class Eag_Plots:
         self.dpi = dpi
 
     def series(self):
-
         fig, axgr = plt.subplots(
             len(self.eag.series.columns),
             1,
@@ -48,9 +47,7 @@ class Eag_Plots:
         )
 
         for icol, iax in zip(self.eag.series.columns, axgr):
-            iax.plot(
-                self.eag.series.index, self.eag.series.loc[:, icol], label=icol
-            )
+            iax.plot(self.eag.series.index, self.eag.series.loc[:, icol], label=icol)
             iax.grid(b=True)
             iax.legend(loc="best")
 
@@ -67,9 +64,7 @@ class Eag_Plots:
             tmax = bucket.fluxes.index[-1]
 
         # get data
-        plotdata = (
-            bucket.fluxes.loc[tmin:tmax].astype(float).resample(freq).mean()
-        )
+        plotdata = bucket.fluxes.loc[tmin:tmax].astype(float).resample(freq).mean()
 
         # get correct colors per flux
         rgbcolors = []
@@ -101,7 +96,6 @@ class Eag_Plots:
         return ax
 
     def aggregated(self, freq="M", tmin=None, tmax=None, add_gemaal=False):
-
         if add_gemaal:
             fluxes = self.eag.aggregate_fluxes_w_pumpstation()
         else:
@@ -204,9 +198,7 @@ class Eag_Plots:
             if icol.lower().startswith("gemaal")
         ]
         if len(gemaal_cols) > 0:
-            gemaal = (
-                self.eag.series.loc[:, gemaal_cols].loc[tmin:tmax].sum(axis=1)
-            )
+            gemaal = self.eag.series.loc[:, gemaal_cols].loc[tmin:tmax].sum(axis=1)
             ax.plot(gemaal.index, gemaal, lw=2, label="gemeten bij gemaal")
 
         ax.set_ylabel("Afvoer (m$^3$/dag)")
@@ -225,7 +217,6 @@ class Eag_Plots:
         period="year",
         month_offset=9,
     ):
-
         if len(self.eag.series.columns.intersection(set(eagseries_names))) > 0:
             cumsum_fluxes, cumsum_series = self.eag.calculate_cumsum(
                 fluxes_names=fluxes_names,
@@ -328,7 +319,7 @@ class Eag_Plots:
         fr.dropna(how="all", axis=1, inplace=True)
 
         # add initial
-        fr_list = [fr["initial"].astype(np.float).values]
+        fr_list = [fr["initial"].astype(np.float64).values]
         labels = ["initieel"]
         colors = ["#c0c0c0"]
 
@@ -336,7 +327,7 @@ class Eag_Plots:
         for icol, c in colordict.items():
             if icol in fr.columns:
                 if fr[icol].dropna().shape[0] > 1:
-                    fr_list.append(fr[icol].astype(np.float).values)
+                    fr_list.append(fr[icol].astype(np.float64).values)
                     colors.append(c)
                     labels.append(icol)
 
@@ -350,8 +341,8 @@ class Eag_Plots:
                 "initial",
                 "intrek",
             ]:
-                if fr[icol].astype(np.float).sum() != 0.0:
-                    fr_list.append(fr[icol].astype(np.float).values)
+                if fr[icol].astype(np.float64).sum() != 0.0:
+                    fr_list.append(fr[icol].astype(np.float64).values)
                     colors.append(mcolors.to_rgba(f"C{m}"))
                     labels.append(icol)
                     m += 1
@@ -374,7 +365,6 @@ class Eag_Plots:
         return ax
 
     def wq_loading(self, mass_in, mass_out, tmin=None, tmax=None, freq="Y"):
-
         # get tmin, tmax if not defined
         if tmin is None:
             tmin = mass_in.index[0]
@@ -382,14 +372,10 @@ class Eag_Plots:
             tmax = mass_in.index[-1]
 
         plotdata_in = (
-            mass_in.loc[tmin:tmax].resample(freq).mean()
-            / self.eag.water.area
-            * 1e3
+            mass_in.loc[tmin:tmax].resample(freq).mean() / self.eag.water.area * 1e3
         )
         plotdata_out = (
-            mass_out.loc[tmin:tmax].resample(freq).mean()
-            / self.eag.water.area
-            * 1e3
+            mass_out.loc[tmin:tmax].resample(freq).mean() / self.eag.water.area * 1e3
         )
 
         # get correct colors per flux
@@ -431,10 +417,7 @@ class Eag_Plots:
         if freq == "M":
             ax.set_xticks(ax.get_xticks()[::2])
             ax.set_xticklabels(
-                [
-                    dt.strftime("%b-%y")
-                    for dt in plotdata_in.index.to_pydatetime()[::2]
-                ]
+                [dt.strftime("%b-%y") for dt in plotdata_in.index.to_pydatetime()[::2]]
             )
             # ax.xaxis.set_major_locator(mdates.YearLocator())
             # ax.xaxis.set_major_formatter(mdates.DateFormatter('%b %d'))
@@ -448,7 +431,6 @@ class Eag_Plots:
         return ax
 
     def water_level(self, plot_obs=None):
-
         hTarget = self.eag.water.parameters.loc["hTarget_1", "Waarde"]
 
         add_target_levels = True
@@ -483,9 +465,7 @@ class Eag_Plots:
                         label="peil metingen",
                     )
         else:
-            ax.axhline(
-                hTarget, linestyle="dashed", lw=1.5, label="hTarget", color="k"
-            )
+            ax.axhline(hTarget, linestyle="dashed", lw=1.5, label="hTarget", color="k")
 
         if add_target_levels:
             if isinstance(hTargetMin, Series):
@@ -541,9 +521,7 @@ class Eag_Plots:
                         label="hTargetMax",
                     )
 
-        ax.axhline(
-            hBottom, linestyle="dashdot", lw=1.5, label="hBottom", color="C2"
-        )
+        ax.axhline(hBottom, linestyle="dashdot", lw=1.5, label="hBottom", color="C2")
 
         ax.set_ylabel("peil (m NAP)")
         ax.legend(loc="best")
@@ -621,10 +599,7 @@ class Eag_Plots:
             # hacky method to subtract excel series from diff
             diff = fluxes.loc[:, pycol].copy()
 
-            if (
-                pycol not in exceldf.columns
-                and pycol not in column_names.keys()
-            ):
+            if pycol not in exceldf.columns and pycol not in column_names.keys():
                 self.eag.logger.warning(
                     "Column '{}' not found in Excel Balance!".format(pycol)
                 )
@@ -640,9 +615,7 @@ class Eag_Plots:
             iax.plot(
                 exceldf.index,
                 exceldf.iloc[:, excol],
-                label="{0:s} (Excel)".format(
-                    exceldf.columns[excol].split(".")[0]
-                ),
+                label="{0:s} (Excel)".format(exceldf.columns[excol].split(".")[0]),
                 ls="dashed",
             )
 
