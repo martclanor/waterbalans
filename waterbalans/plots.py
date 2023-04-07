@@ -48,7 +48,7 @@ class Eag_Plots:
 
         for icol, iax in zip(self.eag.series.columns, axgr):
             iax.plot(self.eag.series.index, self.eag.series.loc[:, icol], label=icol)
-            iax.grid(b=True)
+            iax.grid(True)
             iax.legend(loc="best")
 
         fig.tight_layout()
@@ -203,7 +203,7 @@ class Eag_Plots:
 
         ax.set_ylabel("Afvoer (m$^3$/dag)")
         ax.legend(loc="best")
-        ax.grid(b=True)
+        ax.grid(True)
         fig.tight_layout()
 
         return ax
@@ -268,7 +268,7 @@ class Eag_Plots:
 
         ax.set_ylabel("Cumulatieve afvoer (m$^3$)")
         ax.legend(loc="best")
-        ax.grid(b=True)
+        ax.grid(True)
         fig.tight_layout()
 
         return ax
@@ -285,7 +285,7 @@ class Eag_Plots:
         # Plot
         _, ax = plt.subplots(1, 1, figsize=self.figsize, dpi=150)
         ax.plot(c.index, c, label=self.eag.name)
-        ax.grid(b=True)
+        ax.grid(True)
         ax.legend(loc="best")
         ax.set_ylabel("Concentration (mg/L)")
 
@@ -350,7 +350,7 @@ class Eag_Plots:
         # Plot
         fig, ax = plt.subplots(1, 1, figsize=self.figsize, dpi=150)
         ax.stackplot(fr.index, *fr_list, labels=labels, colors=colors)
-        ax.grid(b=True)
+        ax.grid(True)
         ax.legend(loc="upper center", ncol=2)
         ax.set_ylabel("Percentage (%)")
 
@@ -604,7 +604,7 @@ class Eag_Plots:
                     "Column '{}' not found in Excel Balance!".format(pycol)
                 )
                 iax.legend(loc="best")
-                iax.grid(b=True)
+                iax.grid(True)
                 continue
             else:
                 try:
@@ -619,7 +619,7 @@ class Eag_Plots:
                 ls="dashed",
             )
 
-            iax.grid(b=True)
+            iax.grid(True)
             iax.legend(loc="best")
 
             if showdiff:
@@ -654,7 +654,7 @@ class Eag_Plots:
             label="Berekend peil (Excel)",
             ls="dashed",
         )
-        iax.grid(b=True)
+        iax.grid(True)
         iax.legend(loc="best")
 
         if showdiff:
@@ -714,7 +714,7 @@ class Eag_Plots:
             label="Berekend peil (Excel)",
             ls="dashed",
         )
-        ax.grid(b=True)
+        ax.grid(True)
         ax.legend(loc="best")
         fig.tight_layout()
         return ax
