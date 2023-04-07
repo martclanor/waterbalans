@@ -648,8 +648,10 @@ class Eag:
                     "gone wrong in the waterquality simulation."
                 )
         else:
-            mass_tot = pd.Series(index=fluxes.index, name="mass_tot", dtype=np.float)
-            mass_out = pd.DataFrame(index=fluxes.index, columns=outcols, dtype=np.float)
+            mass_tot = pd.Series(index=fluxes.index, name="mass_tot", dtype=np.float64)
+            mass_out = pd.DataFrame(
+                index=fluxes.index, columns=outcols, dtype=np.float64
+            )
 
             for t in fluxes.index:
                 # mass in
