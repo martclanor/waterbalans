@@ -46,10 +46,7 @@ class Eag:
         logfile=None,
         log_level=logging.INFO,
     ):
-
-        self.logger = self.get_logger(
-            name, filename=logfile, log_level=log_level
-        )
+        self.logger = self.get_logger(name, filename=logfile, log_level=log_level)
 
         # Basic information
         self.gaf = gaf
@@ -86,7 +83,6 @@ class Eag:
 
     @staticmethod
     def get_logger(loggername, log_level=logging.INFO, filename=None):
-
         # Create a custom logger
         logger = logging.getLogger(loggername)
 
@@ -131,9 +127,7 @@ class Eag:
             Replace a bucket if a bucket with this name already exists
         """
         if bucket.idn in self.buckets.keys() and replace is False:
-            raise KeyError(
-                "bucket with ID %s is already in buckets dict." % bucket.idn
-            )
+            raise KeyError("bucket with ID %s is already in buckets dict." % bucket.idn)
         else:
             self.buckets[bucket.idn] = bucket
 
@@ -149,9 +143,7 @@ class Eag:
             force replace of the water object.
         """
         if self.water is not None and replace is False:
-            raise KeyError(
-                "There is already a water bucket present in the " "model."
-            )
+            raise KeyError("There is already a water bucket present in the " "model.")
         else:
             self.water = water
 
@@ -185,9 +177,7 @@ class Eag:
         """
         # Sort series to parse in order: Valueseries -> Local -> FEWS -> Constant
         series = series.sort_values(by="ParamType", ascending=False)
-        self.logger.info(
-            "Parsing timeseries from database export and adding to EAG."
-        )
+        self.logger.info("Parsing timeseries from database export and adding to EAG.")
 
         for idn, df in series.groupby(
             ["ParamType", "BakjeID", "ClusterType"], sort=False
@@ -238,7 +228,7 @@ class Eag:
                     if (s.isna().sum() > 0).all():
                         self.logger.info(
                             "Filled {} NaN-values with 0.0 in series {}.".format(
-                                np.int(s.isna().sum()), ClusterType
+                                np.int_(s.isna().sum()), ClusterType
                             )
                         )
                         s = s.fillna(0.0)
@@ -247,9 +237,7 @@ class Eag:
                     # check if already exists
                     if ClusterType in self.buckets[BakjeID].series.columns:
                         orig_series = self.buckets[BakjeID].series[ClusterType]
-                        new_series = update_series(
-                            orig_series, s, method=method
-                        )
+                        new_series = update_series(orig_series, s, method=method)
                         # add updated series
                         self.buckets[BakjeID].series[ClusterType] = new_series
                     else:  # add new series
@@ -262,23 +250,15 @@ class Eag:
                             ClusterType in self.water.series.columns
                         ):  # check if already exists
                             orig_series = self.water.series[ClusterType]
-                            new_series = update_series(
-                                orig_series, s, method=method
-                            )
+                            new_series = update_series(orig_series, s, method=method)
                             # add updated series
                             self.water.series[ClusterType] = new_series
                         else:  # add new series
                             self.water.series[ClusterType] = s
-                elif (
-                    int(BakjeID) == -9999
-                ):  # add to EAG, no specific bucket defined
-                    if (
-                        ClusterType in self.series.columns
-                    ):  # check if already exists
+                elif int(BakjeID) == -9999:  # add to EAG, no specific bucket defined
+                    if ClusterType in self.series.columns:  # check if already exists
                         orig_series = self.series[ClusterType]
-                        new_series = update_series(
-                            orig_series, s, method=method
-                        )
+                        new_series = update_series(orig_series, s, method=method)
                         if new_series.empty:
                             raise (ValueError("Empty series!"))
                         # add updated series
@@ -286,9 +266,7 @@ class Eag:
                     else:  # add new series
                         self.series[ClusterType] = s
                 else:
-                    self.logger.warning(
-                        "Series '{}' not added.".format(ClusterType)
-                    )
+                    self.logger.warning("Series '{}' not added.".format(ClusterType))
 
         # Create index based on tmin/tmax if no series are added to EAG!
         if self.series.empty:
@@ -365,7 +343,7 @@ class Eag:
             if (series.isna().sum() > 0).all():
                 self.logger.info(
                     "Filled {0} NaN-values with '{1}' in series {2}.".format(
-                        np.int(series.isna().sum()), method, name
+                        np.int_(series.isna().sum()), method, name
                     )
                 )
                 if isinstance(method, str):
@@ -379,9 +357,7 @@ class Eag:
         # - if eag.series doesn't exist, the overlap is equal to series.index
         #   because that index is used to instantiate eag.series
         shared_index = series.index.intersection(self.series.index)
-        self.series.loc[shared_index, name] = series.loc[
-            shared_index
-        ].values.squeeze()
+        self.series.loc[shared_index, name] = series.loc[shared_index].values.squeeze()
 
     def get_series_from_gaf(self):
         """Load series from the Gaf instance if present and no series are
@@ -478,8 +454,7 @@ class Eag:
             p = params.loc[params.loc[:, "BakjeID"] == idn]
 
             self.logger.info(
-                "Simulating the waterbalance for bucket: %s %s"
-                % (bucket.name, idn)
+                "Simulating the waterbalance for bucket: %s %s" % (bucket.name, idn)
             )
             bucket.simulate(params=p.loc[:, "Waarde"], tmin=tmin, tmax=tmax)
 
@@ -500,16 +475,12 @@ class Eag:
         self.simulate(params, tmin=tmin, tmax=tmax)
         self.add_missinginflux_to_eagseries()
         for n in range(extra_iters):
-            self.logger.info(
-                " *** Iteration {0}/{1} ***".format(n + 1, extra_iters)
-            )
+            self.logger.info(" *** Iteration {0}/{1} ***".format(n + 1, extra_iters))
             self.simulate(self.parameters.reset_index(drop=True))
             self.add_missinginflux_to_eagseries()
         end = timer()
         self.logger.info(
-            "*** Iteration Complete! (duration {0:.1f}s) ***".format(
-                end - start
-            )
+            "*** Iteration Complete! (duration {0:.1f}s) ***".format(end - start)
         )
 
     def simulate_wq(
@@ -642,9 +613,7 @@ class Eag:
         # Sum of outgoing fluxes from water bucket
         outcols = ["intrek", "berekende uitlaat", "wegzijging"]
         outcols += [
-            jcol.lower()
-            for jcol in self.water.fluxes
-            if jcol.startswith("Uitlaat")
+            jcol.lower() for jcol in self.water.fluxes if jcol.startswith("Uitlaat")
         ]
         flux_out = fluxes.loc[:, outcols]
 
@@ -672,24 +641,17 @@ class Eag:
                 name="mass_tot",
                 fastpath=True,
             )
-            mass_out = pd.DataFrame(
-                index=fluxes.index, columns=outcols, data=mass_out
-            )
+            mass_out = pd.DataFrame(index=fluxes.index, columns=outcols, data=mass_out)
             if (mass_tot < 0.0).any():
                 raise RuntimeError(
                     "Calculated mass is below 0, something has "
                     "gone wrong in the waterquality simulation."
                 )
         else:
-            mass_tot = pd.Series(
-                index=fluxes.index, name="mass_tot", dtype=np.float
-            )
-            mass_out = pd.DataFrame(
-                index=fluxes.index, columns=outcols, dtype=np.float
-            )
+            mass_tot = pd.Series(index=fluxes.index, name="mass_tot", dtype=np.float)
+            mass_out = pd.DataFrame(index=fluxes.index, columns=outcols, dtype=np.float)
 
             for t in fluxes.index:
-
                 # mass in
                 M_in = mass_in.loc[t].sum()
 
@@ -726,7 +688,6 @@ class Eag:
         mass_tot[0] = C_init * V_init
 
         for i in range(flux_out.shape[0]):
-
             # recalculate concentration after inflow w update storage
             C_out[i] = (mass_tot[i] + np.nansum(mass_in[i])) / (
                 storage[i] + np.nansum(flux_in[i])
@@ -853,14 +814,10 @@ class Eag:
     def aggregate_fluxes_w_pumpstation(self):
         fluxes = self.aggregate_fluxes()
         gemaal_cols = [
-            icol
-            for icol in self.series.columns
-            if icol.lower().startswith("gemaal")
+            icol for icol in self.series.columns if icol.lower().startswith("gemaal")
         ]
         if len(gemaal_cols) == 0:
-            self.logger.warning(
-                "No timeseries for pumping station. Cannot aggregate."
-            )
+            self.logger.warning("No timeseries for pumping station. Cannot aggregate.")
             return fluxes
         fluxes.rename(columns={"berekende uitlaat": "sluitfout"}, inplace=True)
         # Add pumping station timeseries to fluxes
@@ -968,17 +925,13 @@ class Eag:
                 data=fractions,
             )
         else:
-            fractions = pd.DataFrame(
-                index=fluxes.index, columns=fraction_columns
-            )
+            fractions = pd.DataFrame(index=fluxes.index, columns=fraction_columns)
             # add starting day
             fractions.loc[
                 fluxes.index[0] - pd.Timedelta(days=1), fraction_columns
             ] = 0.0
             # add starting day
-            fractions.loc[
-                fluxes.index[0] - pd.Timedelta(days=1), "initial"
-            ] = 1.0
+            fractions.loc[fluxes.index[0] - pd.Timedelta(days=1), "initial"] = 1.0
             fractions.sort_index(inplace=True)
 
             for t in fluxes.index:
@@ -990,10 +943,7 @@ class Eag:
                 ):
                     fractions.loc[t, "initial"] = (
                         fractions.loc[tminus1, "initial"]
-                        * (
-                            self.water.storage.loc[tminus1, "storage"]
-                            + outflux.loc[t]
-                        )
+                        * (self.water.storage.loc[tminus1, "storage"] + outflux.loc[t])
                     ) / self.water.storage.loc[t, "storage"]
 
                     for icol in fraction_columns:
@@ -1017,7 +967,6 @@ class Eag:
     @staticmethod
     @njit
     def _calculate_fractions_numba(storage, influxes, outflux_sum):
-
         # add day before for initial fractions,
         # add extra column for 'initial' fraction
         fractions = np.zeros(
@@ -1038,8 +987,7 @@ class Eag:
                 # loop over influxes
                 for j in range(1, fractions.shape[1]):
                     fractions[i, j] = (
-                        fractions[i - 1, j]
-                        * (storage[i - 1] + outflux_sum[i - 1])
+                        fractions[i - 1, j] * (storage[i - 1] + outflux_sum[i - 1])
                         +
                         # -1 bc influx has no initial column, and is 1 shorter
                         influxes[i - 1, j - 1]
@@ -1071,14 +1019,10 @@ class Eag:
             Series containing the calcualted missing influx per day
         """
         gemaal_cols = [
-            icol
-            for icol in self.series.columns
-            if icol.lower().startswith("gemaal")
+            icol for icol in self.series.columns if icol.lower().startswith("gemaal")
         ]
         if len(gemaal_cols) == 0:
-            raise ValueError(
-                "No series names starting with 'Gemaal' in eag.series!"
-            )
+            raise ValueError("No series names starting with 'Gemaal' in eag.series!")
         if self.water.fluxes.empty:
             raise AttributeError("No simulation data! Simulate model!")
         fluxes = self.aggregate_fluxes()
@@ -1104,16 +1048,13 @@ class Eag:
         )
 
     def output_for_plots(self):
-
         output_dict = {}
 
         output_dict["{}_fluxes.csv".format(self.name)] = self.aggregate_fluxes()
 
         eagseries_names = None
         gemaal_cols = [
-            icol
-            for icol in self.series.columns
-            if icol.lower().startswith("gemaal")
+            icol for icol in self.series.columns if icol.lower().startswith("gemaal")
         ]
         if len(gemaal_cols) > 0:
             eagseries_names = ["Gemaal"]
@@ -1126,14 +1067,11 @@ class Eag:
             for nam, iseries in zip(["inuitflux", "gemaal"], cumsum):
                 output_dict["{}_{}_cumsum.csv".format(self.name, nam)] = iseries
 
-        output_dict[
-            "{}_fractions.csv".format(self.name)
-        ] = self.calculate_fractions()
+        output_dict["{}_fractions.csv".format(self.name)] = self.calculate_fractions()
 
         return output_dict
 
     def output_to_zipfile(self, zipfname, outputdict=None):
-
         import zipfile
 
         if outputdict is None:
